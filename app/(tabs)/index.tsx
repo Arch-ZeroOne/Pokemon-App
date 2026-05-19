@@ -1,98 +1,126 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useEffect, useState } from "react";
+import { StyleSheet } from "react-native";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { Image, ScrollView, Text, View } from "react-native";
 
+//TODO adding now styles based on pokemon type
+interface Pokemon {
+  name: string;
+  image: string;
+  imageBack: string;
+  types: PokemonType[];
+}
+
+interface PokemonType {
+  type: {
+    name: string;
+    url: string;
+  };
+}
+const colorsByType = {
+  // Original types (enhanced)
+  grass: "#4caf50", // Lively, bright green
+  fire: "#ff5722", // Deep orange-red
+  water: "#2196f3", // Strong, clear blue
+  bug: "#8bc34a", // Fresh light green
+  normal: "#9e9e9e", // Clean, neutral gray
+
+  // Additional types
+  electric: "#ffeb3b", // Bright, striking yellow
+  ground: "#cd853f", // Warm earthy brown
+  rock: "#a0522d", // Solid, rocky brown
+  poison: "#ab47bc", // Deep purple (toxic vibe)
+  fighting: "#d32f2f", // Intense red (combat)
+  psychic: "#ff4081", // Vibrant pink (mind power)
+  ghost: "#7b1fa2", // Dark purple (spectral)
+  ice: "#81d4fa", // Cool, icy light blue
+  dragon: "#f57c00", // Gold/orange (mythical)
+  dark: "#424242", // Dark gray (sinister)
+  steel: "#b0bec5", // Metallic silver-gray
+  fairy: "#f48fb1", // Soft pastel pink
+};
+
+// Optional: If you need type for "flying" (often light blue-gray)
+// flying: "#b3e5fc"};
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  //Formats the JSON file
+  console.log(JSON.stringify(pokemons[0], null, 2));
+  useEffect(() => {
+    //fetch pokemons
+    fetchPokemons();
+  }, []);
+
+  async function fetchPokemons() {
+    try {
+      const response = await fetch(
+        "https://pokeapi.co/api/v2/pokemon/?limit=20",
+      );
+      if (response.ok) {
+        const data = await response.json();
+
+        //modified the details and made accessing the key easier when getting a detail from a pokemon
+        const detailedPokemons = await Promise.all(
+          data.results.map(async (pokemon: any) => {
+            const res = await fetch(pokemon.url);
+            const details = await res.json();
+
+            return {
+              name: pokemon.name,
+              image: details.sprites.front_default,
+              imageBack: details.sprites.back_default,
+              types: details.types,
+            };
+          }),
+        );
+
+        setPokemons(detailedPokemons);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return (
+    <ScrollView
+      contentContainerStyle={{
+        gap: 16,
+      }}
+    >
+      {pokemons &&
+        pokemons.map((pokemon) => (
+          <View
+            style={{
+              //@ts-ignore
+              backgroundColor: colorsByType[pokemon.types[0].type.name],
+            }}
+          >
+            <Text style={styles.name}>{pokemon.name}</Text>
+            <Text style={styles.type}>{pokemon.types[0].type.name}</Text>
+            <View style={{ flexDirection: "row" }}>
+              <Image
+                source={{ uri: pokemon.image }}
+                style={{ width: 150, height: 150 }}
+              />
+              <Image
+                source={{ uri: pokemon.imageBack }}
+                style={{ width: 150, height: 150 }}
+              />
+            </View>
+          </View>
+        ))}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  name: {
+    fontSize: 28,
+    fontWeight: "bold",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  type: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "grey",
   },
 });
