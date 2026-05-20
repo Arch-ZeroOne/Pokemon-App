@@ -1,3 +1,4 @@
+import { Link } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 
@@ -18,28 +19,30 @@ interface PokemonType {
   };
 }
 const colorsByType = {
-  // Original types (enhanced)
-  grass: "#4caf50", // Lively, bright green
-  fire: "#ff5722", // Deep orange-red
-  water: "#2196f3", // Strong, clear blue
-  bug: "#8bc34a", // Fresh light green
-  normal: "#9e9e9e", // Clean, neutral gray
+  normal: "#A8A77A",
+  fire: "#EE8130",
+  water: "#6390F0",
+  electric: "#F7D02C",
+  grass: "#7AC74C",
+  ice: "#96D9D6",
+  fighting: "#C22E28",
+  poison: "#A33EA1",
+  ground: "#E2BF65",
+  flying: "#A98FF3",
+  psychic: "#F95587",
+  bug: "#A6B91A",
+  rock: "#B6A136",
+  ghost: "#735797",
+  dragon: "#6F35FC",
+  dark: "#705746",
+  steel: "#B7B7CE",
+  fairy: "#D685AD",
 
-  // Additional types
-  electric: "#ffeb3b", // Bright, striking yellow
-  ground: "#cd853f", // Warm earthy brown
-  rock: "#a0522d", // Solid, rocky brown
-  poison: "#ab47bc", // Deep purple (toxic vibe)
-  fighting: "#d32f2f", // Intense red (combat)
-  psychic: "#ff4081", // Vibrant pink (mind power)
-  ghost: "#7b1fa2", // Dark purple (spectral)
-  ice: "#81d4fa", // Cool, icy light blue
-  dragon: "#f57c00", // Gold/orange (mythical)
-  dark: "#424242", // Dark gray (sinister)
-  steel: "#b0bec5", // Metallic silver-gray
-  fairy: "#f48fb1", // Soft pastel pink
+  // Optional extra types from newer games
+  stellar: "#40C4FF",
+  unknown: "#68A090",
+  shadow: "#5A5A5A",
 };
-
 // Optional: If you need type for "flying" (often light blue-gray)
 // flying: "#b3e5fc"};
 export default function HomeScreen() {
@@ -89,25 +92,37 @@ export default function HomeScreen() {
     >
       {pokemons &&
         pokemons.map((pokemon) => (
-          <View
+          <Link
+            href={"/details"}
             style={{
-              //@ts-ignore
-              backgroundColor: colorsByType[pokemon.types[0].type.name],
+              //@ts-ignore -> ignores the type problem since it is not a future problem in production
+              backgroundColor: colorsByType[pokemon.types[0].type.name] + 50,
+              padding: 20,
+              borderRadius: 20,
             }}
           >
-            <Text style={styles.name}>{pokemon.name}</Text>
-            <Text style={styles.type}>{pokemon.types[0].type.name}</Text>
-            <View style={{ flexDirection: "row" }}>
-              <Image
-                source={{ uri: pokemon.image }}
-                style={{ width: 150, height: 150 }}
-              />
-              <Image
-                source={{ uri: pokemon.imageBack }}
-                style={{ width: 150, height: 150 }}
-              />
+            <View
+              style={{
+                //@ts-ignore -> ignores the type problem since it is not a future problem in production
+                backgroundColor: colorsByType[pokemon.types[0].type.name] + 50,
+                padding: 20,
+                borderRadius: 20,
+              }}
+            >
+              <Text style={styles.name}>{pokemon.name}</Text>
+              <Text style={styles.type}>{pokemon.types[0].type.name}</Text>
+              <View style={{ flexDirection: "row" }}>
+                <Image
+                  source={{ uri: pokemon.image }}
+                  style={{ width: 150, height: 150 }}
+                />
+                <Image
+                  source={{ uri: pokemon.imageBack }}
+                  style={{ width: 150, height: 150 }}
+                />
+              </View>
             </View>
-          </View>
+          </Link>
         ))}
     </ScrollView>
   );
@@ -117,10 +132,12 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 28,
     fontWeight: "bold",
+    textAlign: "center",
   },
   type: {
     fontSize: 20,
     fontWeight: "bold",
     color: "grey",
+    textAlign: "center",
   },
 });
