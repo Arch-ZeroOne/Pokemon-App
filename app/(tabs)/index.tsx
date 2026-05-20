@@ -92,8 +92,10 @@ export default function HomeScreen() {
     >
       {pokemons &&
         pokemons.map((pokemon) => (
+          //Our dynamic route with dynamic parameter
+          //Params shall receive an object thats why we wrap the pokemon name here
           <Link
-            href={"/details"}
+            href={{ pathname: "/details", params: { name: pokemon.name } }}
             style={{
               //@ts-ignore -> ignores the type problem since it is not a future problem in production
               backgroundColor: colorsByType[pokemon.types[0].type.name] + 50,
